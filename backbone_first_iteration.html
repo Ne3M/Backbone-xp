@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Backbone.js Experiments</title>
+</head>
+<body>
+
+
+	<label for="dices">Dice : </label>
+	<input type="text" name="dices" id="dices" placeholder="Ajoutez un dé" data-pattern="([0-9]+)[d]([0-9]+)" />
+
+<div class="diceList"></div>
+
+<script src="http://codeorigin.jquery.com/jquery-2.0.3.min.js" type="text/javascript"></script>
+<script src="http://ajax.cdnjs.com/ajax/libs/underscore.js/1.1.4/underscore-min.js"></script>
+<script src="http://ajax.cdnjs.com/ajax/libs/backbone.js/0.3.3/backbone-min.js"></script>
+<script>
+	(function ($) {
+		Dice = Backbone.Model.extend({
+			side: null,
+			quantity: null
+		});
+
+		Dices = Backbone.Collection.extend({
+			model: Dice,
+			initialize: function(models, options){
+				this.bind("add", options.view.update);
+			}
+		});
+		
+		DiceGenerator = Backbone.View.extend({
+			el: $("body"),
+			initialize: function () {
+				this.dices = new Dices( null, { view: this });
+			},
+			events: {
+				"change #dices" : "addDice"
+			},
+			addDice: function(e){
+				var target = e.currentTarget;
+				var target_value = e.currentTarget.value.toLowerCase();
+				if( target_value.match($(target).data('pattern')) ) {
+					var side = target_value.split('d')[1];
+					var quantity = target_value.split('d')[0];
+					var new_dice = new Dice({ side: side, quantity: quantity });
+					$(target).val('');
+					this.dices.add(new_dice);
+				} else {
+					alert('Format incorrect')
+				}
+			},
+			update : function(model){
+				$('.diceList').append("<div>You want to roll : "+ model.get('quantity')+"D"+model.get('side')+"</div>");
+			}
+
+		});
+
+		window.generator = new DiceGenerator;
+
+	})(jQuery);
+</script>
+</body>
+</html>
