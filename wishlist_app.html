@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Backbone.js Experiments</title>
+</head>
+<body>
+
+<form action="" class="create_user" name="create_user">
+	<fieldset>
+		<div>
+			<label for="user-name">Username : </label><input type="text" id="user-name" name="user-name">
+		</div>
+		<div>
+			<label for="user-birthday">Birthday : </label><input type="date" name="user-birthday" id="user-birthday">
+		</div>
+		<div>
+			<input type="submit" value="OK">
+		</div>
+	</fieldset>
+</form>
+
+
+<script src="http://codeorigin.jquery.com/jquery-2.0.3.min.js" type="text/javascript"></script>
+<script src="http://ajax.cdnjs.com/ajax/libs/underscore.js/1.1.4/underscore-min.js"></script>
+<script src="http://ajax.cdnjs.com/ajax/libs/backbone.js/0.3.3/backbone-min.js"></script>
+<script>
+	(function ($) {
+		User = Backbone.Model.extend({
+			nick: null,
+			birthday: null
+		});
+
+		Gift = Backbone.Model.extend({
+			name: null,
+			url: null,
+			price: null
+		});
+
+		Users = Backbone.Collection.extend({
+			model: User
+		});
+
+		Gifts = Backbone.Collection.extend({
+			model: Gift
+		});
+		
+		Wishlist = Backbone.View.extend({
+			el: $("body"),
+			events: {
+				"submit .create_user" : "addUser"
+			},
+			initialize: function () {
+				_.bindAll(this, 'render', 'addUser'); // remember: every function that uses 'this' as the current object should be in here
+
+				this.users = new Users( null, { view: this });
+				this.users.bind('add', this.appendUser); // collection event binder
+
+				this.gifts = new Gifts( null, { view: this });
+				//this.gifts.bind('add', this.appendItem); // collection event binder
+
+				this.render();
+			},
+			render: function(){
+				var userList = $('<ul>', {class: 'userList'});
+				$(this.el).append(userList);
+			},
+			addUser : function(e){
+				
+				var target = $(e.currentTarget);
+				var nick = target.find('#user-name').val();
+				var birthday = target.find('#user-birthday').val();
+				var new_user = new User({ nick: nick, birthday: birthday });
+				this.users.add(new_user);
+				e.preventDefault();
+
+			},
+			appendUser: function(user){
+				$('.userList').append("<li>Ajout de "+ user.get('nick') + " - Anniversaire le "+ user.get('birthday')+"</li>");
+			}
+
+		});
+
+		window.wishlist = new Wishlist;
+
+/* Run through Collection
+wishlist.users.each(function(log) {
+    console.log(log.attributes.nick);
+    console.log(log.attributes.birthday);
+});
+*/
+
+	})(jQuery);
+</script>
+</body>
+</html>
